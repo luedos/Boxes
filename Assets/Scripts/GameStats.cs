@@ -1,0 +1,53 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class GameStats : MonoBehaviour {
+
+    static GameStats instance = null;
+
+    public int BoxesInHight = 3;
+    public int BoxesInWidth = 3;
+
+    public Color FirstColor;
+    public Color SecondColor;
+
+
+
+    public float BoxWide = 5.12f;
+
+    [HideInInspector] public bool isFirstTurn = true;
+
+    public static GameStats Instance
+    {
+        get
+        {
+            if (instance == null)
+                instance = new GameObject().AddComponent<GameStats>();
+            return instance;
+        }
+    }
+
+    void Awake()
+    {
+        if (instance == null)
+            instance = this;
+        else if (instance != this)
+              {
+                Destroy(gameObject);
+                return;
+              }
+
+        DontDestroyOnLoad(gameObject);
+    }
+
+    // Use this for initialization
+    void Start () {
+		
+	}
+	
+	// Update is called once per frame
+	void Update () {
+		
+	}
+}
