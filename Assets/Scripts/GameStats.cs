@@ -12,7 +12,10 @@ public class GameStats : MonoBehaviour {
     public Color FirstColor;
     public Color SecondColor;
 
+    public bool isServer = true;
 
+    public string IP;
+    public int PORT;
 
     public float BoxWide = 5.12f;
 

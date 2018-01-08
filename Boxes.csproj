@@ -286,7 +286,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\GameManager.cs" />
+    <Compile Include="Assets\Scripts\GameManager_Offline.cs" />
+    <Compile Include="Assets\Scripts\GameManager_Online.cs" />
     <Compile Include="Assets\Scripts\GameStats.cs" />
+    <Compile Include="Assets\Scripts\GridGenerator.cs" />
     <Compile Include="Assets\Scripts\HUD.cs" />
     <Compile Include="Assets\Scripts\S_Box.cs" />
     <Compile Include="Assets\Scripts\S_Dot.cs" />

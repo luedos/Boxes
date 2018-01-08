@@ -17,6 +17,7 @@ public class S_Line : MonoBehaviour {
 
     public bool IsOccupied { get { return isOccupied; } }
 
+    Color StartColor;
 
     // Use this for initialization
     void Start () {
@@ -35,6 +36,8 @@ public class S_Line : MonoBehaviour {
             RightUpDot = LeftBottomDot + 1;
         }
 
+        StartColor = GetComponent<SpriteRenderer>().color;
+
         transform.localScale = Vector3.one * GameStats.Instance.BoxWide / 5.12f;
     }
 	
@@ -45,6 +48,7 @@ public class S_Line : MonoBehaviour {
 
     public void OnMouseDown()
     {
+        if(GameManager.Instance.CanTurn)
         if(Occupy())
         GameManager.Instance.MakeTurnByLine(Index);
     }
@@ -63,13 +67,13 @@ public class S_Line : MonoBehaviour {
         return false;
     }
 
-    public bool HardOccupy()
+    public bool HardOccupy(bool inOccupy = true)
     {
-        GetComponent<SpriteRenderer>().color = Color.cyan;
 
-        if (!isOccupied)
+        if (inOccupy != IsOccupied)
         {
-            isOccupied = true;
+            GetComponent<SpriteRenderer>().color = inOccupy ? Color.cyan : StartColor;
+            isOccupied = inOccupy;
             return true;
         }
         return false;

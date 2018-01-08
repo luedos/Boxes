@@ -15,6 +15,7 @@ public class S_Box : MonoBehaviour {
 
     public Color OccupiedColor;
 
+    Color StartColor;
 
     // Use this for initialization
     void Start () {
@@ -27,6 +28,8 @@ public class S_Box : MonoBehaviour {
         UpLine = BottomLine + GameStats.Instance.BoxesInWidth;
 
         transform.localScale = Vector3.one * GameStats.Instance.BoxWide / 5.12f;
+
+        StartColor = GetComponent<SpriteRenderer>().color;
     }
 	
 	// Update is called once per frame
@@ -36,8 +39,9 @@ public class S_Box : MonoBehaviour {
 
     private void OnMouseDown()
     {
-        if (Occupy())
-            GameManager.Instance.MakeTurnByBox(Index);
+        if (GameManager.Instance.CanTurn)
+            Occupy();
+
     }
 
     public bool Occupy()
@@ -97,6 +101,10 @@ public class S_Box : MonoBehaviour {
 
     }
 
+    public void Refresh()
+    {
+        GetComponent<SpriteRenderer>().color = StartColor;
+    }
     public bool CheckIsFill()
     {
         if (!GameManager.Instance.MyLines[LeftLine].IsOccupied)
