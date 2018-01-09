@@ -3,15 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 public enum E_Messages
 {
     M_Turn = 0,
     M_NewGame = 1,
-    M_GameOver = 2
+    M_GameOver = 2,
+    M_GameInvite
 }
 
 public class GameManager_Online : GameManager {
+
+    bool IsGameOverState = false;
+
+    bool IsIReady = false;
+    bool IsOponentReady = false;
+
+    public GameObject WaitingRespondScreen;
 
     int hostId;
     int channelId;
@@ -25,6 +34,8 @@ public class GameManager_Online : GameManager {
 
         //byte[] buffer = System.BitConverter.GetBytes(GameStats.Instance.BoxesInWidth);
         print("byte : " + sizeof(byte));
+
+        WaitingRespondScreen.SetActive(true);
 
         Connect();
     }
@@ -87,17 +98,23 @@ public class GameManager_Online : GameManager {
                 }
                 if (recBuffer[0] == (byte)E_Messages.M_GameOver)
                 {
-                    print("Get Game over");
-                    RecGameOver();
+                    if (!GameStats.Instance.isServer)
+                        RecGameOver();
                 }
                 if (recBuffer[0] == (byte)E_Messages.M_Turn)
                 {
                     print("Get turn");
                     RecTurn();
                 }
+                if(recBuffer[0] == (byte)E_Messages.M_GameInvite)
+                {
+                    print("GameInvite");
+                    GameInvite();
+                }
                 break;
             case NetworkEventType.DisconnectEvent:
                 print("OnDisconected");
+                Disconnect();
                 break;
 
 
@@ -206,16 +223,73 @@ public class GameManager_Online : GameManager {
 
     void RecGameOver()
     {
+        int MyWins = 0;
+        int OtherWins = 0;
 
-    }
+        int recHostId;
+        int recConnectionId;
+        int recChannelId;
+        byte[] recBuffer = new byte[4];
 
-    private void Disconnect ()
-    {
+        int dataSize;
+        byte error;
+        NetworkEventType recData = NetworkTransport.Receive(out recHostId, out recConnectionId, out recChannelId, recBuffer, sizeof(int), out dataSize, out error);
+        switch (recData)
+        {
+            case NetworkEventType.DataEvent:
+                //if (System.BitConverter.IsLittleEndian)
+                //    Array.Reverse(recBuffer);
+
+                OtherWins = System.BitConverter.ToInt32(recBuffer, 0);
+
+                break;
+        }
+        recData = NetworkTransport.Receive(out recHostId, out recConnectionId, out recChannelId, recBuffer, sizeof(int), out dataSize, out error);
+        switch (recData)
+        {
+            case NetworkEventType.DataEvent:
+                //if (System.BitConverter.IsLittleEndian)
+                //    Array.Reverse(recBuffer);
+
+                MyWins = System.BitConverter.ToInt32(recBuffer, 0);
+
+                break;
+        }
+
+        if(GameStats.Instance.FirstWins != MyWins)        
+            GameStats.Instance.FirstWins = MyWins;
+
+        if (GameStats.Instance.SecondWins != OtherWins)
+            GameStats.Instance.SecondWins = OtherWins;
+
+
+        if(!IsGameOverState)
+            GameOver();
         
     }
 
-    protected override void NewGame()
+    public void Disconnect ()
     {
+        NetworkTransport.Disconnect(hostId, connectionId, out error);
+        SceneManager.LoadScene(0);
+    }
+
+    public override void NewGame()
+    {
+        IsGameOverState = false;
+
+        WaitingRespondScreen.SetActive(false);
+
+        GameOverScreen.SetActive(false);
+
+        int MainLength = GameStats.Instance.BoxesInWidth > GameStats.Instance.BoxesInHight ? GameStats.Instance.BoxesInWidth : GameStats.Instance.BoxesInHight;
+
+        GameStats.Instance.BoxWide = 6f / MainLength;
+
+        if (MyCamera != null)
+            MyCamera.transform.position = new Vector3(GameStats.Instance.BoxesInWidth * GameStats.Instance.BoxWide / 2f,
+                GameStats.Instance.BoxesInHight * GameStats.Instance.BoxWide / 2, -10);
+
         if (GameStats.Instance.isServer)
         {
             byte[] buffer = { (byte)E_Messages.M_NewGame };
@@ -245,12 +319,69 @@ public class GameManager_Online : GameManager {
 
         GridGenerator.GenerateGrid(out MyDots, out MyLines, out MyBoxes, GameStats.Instance.BoxWide, GameStats.Instance.BoxesInWidth, GameStats.Instance.BoxesInHight, MyBox, MyLine, MyDot);
 
-        
+        MyHUD.SetActive(true);
     }
 
     protected override void GameOver()
     {
-        base.GameOver();
+        IsGameOverState = true;
+
+        IsIReady = false;
+        IsOponentReady = false;
+
+        // Game over, start again
+
+        MyHUD.GetComponent<HUD>().UpdateHUD();
+        MyHUD.SetActive(false);
+
+        GameOverScreen.SetActive(true);
+    }
+
+    public void SetReady()
+    {
+        IsIReady = true;
+
+        if (IsOponentReady)
+        {
+            if (GameStats.Instance.isServer)
+                NewGame();
+            else
+            {
+                byte[] buffer = { (byte)E_Messages.M_GameInvite };
+
+                NetworkTransport.Send(hostId, connectionId, channelId, buffer, sizeof(byte), out error);
+
+                GameOverScreen.SetActive(false);
+
+                WaitingRespondScreen.SetActive(true);
+            }
+        }
+        else
+        {
+            byte[] buffer = { (byte)E_Messages.M_GameInvite };
+
+            NetworkTransport.Send(hostId, connectionId, channelId, buffer, sizeof(byte), out error);
+
+            GameOverScreen.SetActive(false);
+
+            WaitingRespondScreen.SetActive(true);
+        }
+
+    }
+
+    void GameInvite()
+    {
+        if (!IsIReady)
+            IsOponentReady = true;
+        else
+            if (GameStats.Instance.isServer)
+                NewGame();
+            else
+            {
+                byte[] buffer = { (byte)E_Messages.M_GameInvite };
+
+                NetworkTransport.Send(hostId, connectionId, channelId, buffer, sizeof(byte), out error);
+            }
     }
 
 
@@ -299,6 +430,10 @@ public class GameManager_Online : GameManager {
 
         if (AllBoxesFill)
         {
+            if (FirstScore > SecondScore)
+                GameStats.Instance.FirstWins += 1;
+            if(FirstScore < SecondScore)
+                GameStats.Instance.SecondWins += 1;
             GameOver();
             return;
         }
@@ -306,5 +441,8 @@ public class GameManager_Online : GameManager {
 
         IsFirstTurn = CanTurn = !IsFirstTurn;
     }
+
+
+    
 
 }

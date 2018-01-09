@@ -39,7 +39,7 @@ public class S_Box : MonoBehaviour {
 
     private void OnMouseDown()
     {
-        if (GameManager.Instance.CanTurn)
+        if (GameManager.Instance.CanTurn && !GameManager.Instance.OnPause)
             Occupy();
 
     }

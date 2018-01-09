@@ -4,10 +4,13 @@ using UnityEngine;
 
 public class GameStats : MonoBehaviour {
 
+    [HideInInspector] public int FirstWins;
+    [HideInInspector] public int SecondWins;
+
     static GameStats instance = null;
 
-    public int BoxesInHight = 3;
-    public int BoxesInWidth = 3;
+    public int BoxesInHight = 1;
+    public int BoxesInWidth = 2;
 
     public Color FirstColor;
     public Color SecondColor;

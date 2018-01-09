@@ -1,12 +1,25 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager_Offline : GameManager {
 
 	// Use this for initialization
 	void Start () {
-        GridGenerator.GenerateGrid(out MyDots, out MyLines, out MyBoxes, GameStats.Instance.BoxWide, GameStats.Instance.BoxesInWidth, GameStats.Instance.BoxesInHight, MyBox, MyLine, MyDot);
+
+        int MainLength = GameStats.Instance.BoxesInWidth > GameStats.Instance.BoxesInHight ? GameStats.Instance.BoxesInWidth : GameStats.Instance.BoxesInHight;
+
+        GameStats.Instance.BoxWide = 6f / MainLength;
+
+        if (MyCamera != null)
+            MyCamera.transform.position = new Vector3( GameStats.Instance.BoxesInWidth * GameStats.Instance.BoxWide / 2f,
+                GameStats.Instance.BoxesInHight * GameStats.Instance.BoxWide / 2, -10);
+
+        GridGenerator.GenerateGrid(out MyDots, out MyLines, out MyBoxes, 6f / MainLength, GameStats.Instance.BoxesInWidth, GameStats.Instance.BoxesInHight, MyBox, MyLine, MyDot);
+
+       
+
     }
 	
 	// Update is called once per frame
@@ -51,8 +64,11 @@ public class GameManager_Offline : GameManager {
         IsFirstTurn = !IsFirstTurn;
     }
 
-    protected override void NewGame()
+    public override void NewGame()
     {
+        GameOverScreen.SetActive(false);
+        MyHUD.SetActive(true);
+
         foreach (S_Box b in MyBoxes)
             b.Refresh();
 
@@ -62,7 +78,13 @@ public class GameManager_Offline : GameManager {
 
     protected override void GameOver()
     {
-        NewGame();
-        base.GameOver();
+        GameOverScreen.SetActive(true);
+
+        MyHUD.SetActive(false);
+    }
+
+    public void GoMainMenu()
+    {
+        SceneManager.LoadScene(0);
     }
 }

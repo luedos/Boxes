@@ -7,6 +7,11 @@ public class HUD : MonoBehaviour {
 
     public Image FirstImage;
     public Image SecondImage;
+    public Text FirstText;
+    public Text SecondText;
+
+    public GameObject PauseButton;
+    public GameObject PauseMenu;
 
     bool IsFirst;
 
@@ -34,4 +39,24 @@ public class HUD : MonoBehaviour {
         }
 
 	}
+
+    public void UpdateHUD()
+    {
+        FirstText.text = GameStats.Instance.FirstWins.ToString();
+        SecondText.text = GameStats.Instance.SecondWins.ToString();
+    }
+
+    public void GoPause()
+    {
+        PauseButton.SetActive(false);
+        PauseMenu.SetActive(true);
+        GameManager.Instance.OnPause = true;
+    }
+    public void GoUnpause()
+    {
+
+        PauseButton.SetActive(true);
+        PauseMenu.SetActive(false);
+        GameManager.Instance.OnPause = false;
+    }
 }

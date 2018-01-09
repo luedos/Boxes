@@ -13,7 +13,11 @@ public class GameManager : MonoBehaviour {
     public GameObject MyBox;
     public GameObject MyLine;
     public GameObject MyDot;
+    public Camera MyCamera;
+    public GameObject GameOverScreen;
+    public GameObject MyHUD;
 
+    [HideInInspector] public bool OnPause = false;
     [HideInInspector] public bool IsFirstTurn = true;
     [HideInInspector] public int FirstScore = 0;
     [HideInInspector] public int SecondScore = 0;
@@ -83,7 +87,7 @@ public class GameManager : MonoBehaviour {
         IsFirstTurn = !IsFirstTurn;
     }
 
-    protected virtual void NewGame()
+    public virtual void NewGame()
     {
 
     }

@@ -48,7 +48,7 @@ public class S_Line : MonoBehaviour {
 
     public void OnMouseDown()
     {
-        if(GameManager.Instance.CanTurn)
+        if(GameManager.Instance.CanTurn && !GameManager.Instance.OnPause)
         if(Occupy())
         GameManager.Instance.MakeTurnByLine(Index);
     }
