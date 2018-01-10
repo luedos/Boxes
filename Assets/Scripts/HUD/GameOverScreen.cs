@@ -10,7 +10,8 @@ public class GameOverScreen : MonoBehaviour {
     public Text FirstText;
     public Text SecondText;
 
-    private void Awake()
+    // seting up some variables
+    public void OnEnable()
     {
         FirstImage.color = GameStats.Instance.FirstColor;
         SecondImage.color = GameStats.Instance.SecondColor;
@@ -18,4 +19,5 @@ public class GameOverScreen : MonoBehaviour {
         SecondText.text = GameStats.Instance.SecondWins.ToString();
 
     }
+   
 }

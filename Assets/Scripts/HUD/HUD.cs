@@ -15,7 +15,7 @@ public class HUD : MonoBehaviour {
 
     bool IsFirst;
 
-	// Use this for initialization
+    // seting colors 
 	void Start () {
 
         IsFirst = GameManager.Instance.IsFirstTurn;
@@ -26,7 +26,7 @@ public class HUD : MonoBehaviour {
 
     }
 	
-	// Update is called once per frame
+	// if turn changed light up one color and make darker another
 	void Update () {
 		
         if(IsFirst != GameManager.Instance.IsFirstTurn)
@@ -39,22 +39,23 @@ public class HUD : MonoBehaviour {
         }
 
 	}
-
+    // update score numbers
     public void UpdateHUD()
     {
         FirstText.text = GameStats.Instance.FirstWins.ToString();
         SecondText.text = GameStats.Instance.SecondWins.ToString();
     }
 
+    // show pause menu
     public void GoPause()
     {
         PauseButton.SetActive(false);
         PauseMenu.SetActive(true);
         GameManager.Instance.OnPause = true;
     }
+    // hide pause menu
     public void GoUnpause()
     {
-
         PauseButton.SetActive(true);
         PauseMenu.SetActive(false);
         GameManager.Instance.OnPause = false;

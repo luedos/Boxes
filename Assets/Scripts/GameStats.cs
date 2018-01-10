@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class GameStats : MonoBehaviour {
-
+    // every self explaining, just singleton to carry data 
     [HideInInspector] public int FirstWins;
     [HideInInspector] public int SecondWins;
 
-    static GameStats instance = null;
+    static GameStats instance = null;       // for "sigleton"
 
     public int BoxesInHight = 1;
     public int BoxesInWidth = 2;
@@ -47,13 +47,5 @@ public class GameStats : MonoBehaviour {
         DontDestroyOnLoad(gameObject);
     }
 
-    // Use this for initialization
-    void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+
 }

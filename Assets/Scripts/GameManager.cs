@@ -6,9 +6,9 @@ public class GameManager : MonoBehaviour {
 
     static GameManager instance = null;
     
-    [HideInInspector] public List<S_Box> MyBoxes = new List<S_Box>();
-    [HideInInspector] public List<S_Line> MyLines = new List<S_Line>();
-    [HideInInspector] public List<S_Dot> MyDots = new List<S_Dot>();
+    [HideInInspector] public List<S_Box> MyBoxes = new List<S_Box>();           // All boxes on the level
+    [HideInInspector] public List<S_Line> MyLines = new List<S_Line>();         // All lines on the level
+    [HideInInspector] public List<S_Dot> MyDots = new List<S_Dot>();            // All dots on the level
 
     public GameObject MyBox;
     public GameObject MyLine;
@@ -36,18 +36,6 @@ public class GameManager : MonoBehaviour {
             return;
         }
     }
-
-    // Use this for initialization
-    void Start () {
-
-        //GridGenerator.GenerateGrid(out MyDots, out MyLines, out MyBoxes, GameStats.Instance.BoxWide, GameStats.Instance.BoxesInWidth, GameStats.Instance.BoxesInHight);
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
 
 
     public virtual void MakeTurnByLine(int inIndex)

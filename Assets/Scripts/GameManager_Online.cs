@@ -28,39 +28,35 @@ public class GameManager_Online : GameManager {
 
     byte error;
 
+    // waiting for connection
     private void Start()
     {
-        print("Start connecting");
-
-        //byte[] buffer = System.BitConverter.GetBytes(GameStats.Instance.BoxesInWidth);
-        print("byte : " + sizeof(byte));
 
         WaitingRespondScreen.SetActive(true);
 
         Connect();
     }
 
+    // set up connection
     public void Connect()
     {
 
         NetworkTransport.Init();
 
         ConnectionConfig config = new ConnectionConfig();
-        channelId = config.AddChannel(QosType.Reliable);
+        channelId = config.AddChannel(QosType.Reliable);        // only reliable channel
 
         //Here we created a topology that allows up to 10 connections, each of them are configured by the parameters defined in previous step.
         HostTopology topology = new HostTopology(config, 10);
 
-        //As all preliminary steps are done, we can create the host (open socket):
-        //Here we add a new host on port 8888 and any ip addresses. This host will support up to 10 connections, and each connection will have parameters as we defined in config object.
-        if (GameStats.Instance.isServer)
+       if (GameStats.Instance.isServer)
             hostId = NetworkTransport.AddHost(topology, GameStats.Instance.PORT);
         else
         {
-            hostId = NetworkTransport.AddHost(topology, 0); // !!! can be problems !!!
+            hostId = NetworkTransport.AddHost(topology, 0);
             connectionId = NetworkTransport.Connect(hostId, GameStats.Instance.IP, GameStats.Instance.PORT, 0, out error);
         }
-        print("End connecting");
+        
     }
 
     private void Update()
@@ -77,73 +73,47 @@ public class GameManager_Online : GameManager {
         switch (recData)
         {
             case NetworkEventType.ConnectEvent:
-                print("OnConnected");
                 if (GameStats.Instance.isServer)
                 {
-
+                    // server starts game, and client waiting for it
                     connectionId = recConnectionId;
-
                     NewGame();
                 }
                 else
                     if (connectionId != recConnectionId)
-                    connectionId = recConnectionId;
+                         connectionId = recConnectionId;
                 break;
-            case NetworkEventType.DataEvent:
+            case NetworkEventType.DataEvent:                     // receiving data about packet
                 
                 if (recBuffer[0] == (byte)E_Messages.M_NewGame)
                 {
-                    print("GetNewGame");
                     RecNewGame();
                 }
+
                 if (recBuffer[0] == (byte)E_Messages.M_GameOver)
                 {
-                    if (!GameStats.Instance.isServer)
-                        RecGameOver();
+                    RecGameOver();
                 }
+
                 if (recBuffer[0] == (byte)E_Messages.M_Turn)
                 {
-                    print("Get turn");
                     RecTurn();
                 }
+
                 if(recBuffer[0] == (byte)E_Messages.M_GameInvite)
                 {
-                    print("GameInvite");
                     GameInvite();
                 }
                 break;
             case NetworkEventType.DisconnectEvent:
-                print("OnDisconected");
                 Disconnect();
                 break;
 
 
         }
     }
-
-    void TestRecive()
-    {
-        int recHostId;
-        int recConnectionId;
-        int recChannelId;
-        byte[] recBuffer = new byte[4];
-
-        int dataSize;
-        byte error;
-        NetworkEventType recData = NetworkTransport.Receive(out recHostId, out recConnectionId, out recChannelId, recBuffer, recBuffer.Length * sizeof(byte), out dataSize, out error);
-        switch (recData)
-        {
-            case NetworkEventType.DataEvent:
-                if (BitConverter.IsLittleEndian)
-                {
-                    print("little endian indeed");
-                    Array.Reverse(recBuffer);
-                }
-                print("TestRecive : " + System.BitConverter.ToInt32(recBuffer, 0));
-                break;
-        }
-    }
-
+    
+    // this packet receives only client, here we get data about grid and which turn is first
     void RecNewGame()
     {
         int x = 3;
@@ -161,8 +131,10 @@ public class GameManager_Online : GameManager {
         switch (recData)
         {
             case NetworkEventType.DataEvent:
-                //if (System.BitConverter.IsLittleEndian)
-                //    Array.Reverse(recBuffer);
+
+                if (System.BitConverter.IsLittleEndian)
+                    Array.Reverse(recBuffer);
+
                 x = System.BitConverter.ToInt32(recBuffer,0);
                 break;
         }
@@ -170,18 +142,23 @@ public class GameManager_Online : GameManager {
         switch (recData)
         {
             case NetworkEventType.DataEvent:
-                //if (BitConverter.IsLittleEndian)
-                //    Array.Reverse(recBuffer);
+
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(recBuffer);
+
                 y = BitConverter.ToInt32(recBuffer, 0);
                 break;
         }
 
+        recBuffer = new byte[1];
         recData = NetworkTransport.Receive(out recHostId, out recConnectionId, out recChannelId, recBuffer, sizeof(bool), out dataSize, out error);
         switch (recData)
         {
             case NetworkEventType.DataEvent:
-                //if (BitConverter.IsLittleEndian)
-                //    Array.Reverse(recBuffer);
+
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(recBuffer);
+
                 T = BitConverter.ToBoolean(recBuffer, 0);
                 break;
         }
@@ -190,9 +167,11 @@ public class GameManager_Online : GameManager {
         GameStats.Instance.BoxesInHight = y;
         IsFirstTurn = CanTurn = T;
 
-        NewGame();
+        NewGame();      // here client starts game
     }
 
+
+    // here we receiving data about turn made by our opponent
     void RecTurn()
     {
         int l = 0;
@@ -209,8 +188,9 @@ public class GameManager_Online : GameManager {
         switch (recData)
         {
             case NetworkEventType.DataEvent:
-                //if (System.BitConverter.IsLittleEndian)
-                //    Array.Reverse(recBuffer);
+
+                if (System.BitConverter.IsLittleEndian)
+                    Array.Reverse(recBuffer);
                 
                 l = System.BitConverter.ToInt32(recBuffer, 0);
                 
@@ -221,6 +201,7 @@ public class GameManager_Online : GameManager {
 
     }
 
+    // here we comparing scores, and if our score inright we change it
     void RecGameOver()
     {
         int MyWins = 0;
@@ -237,8 +218,9 @@ public class GameManager_Online : GameManager {
         switch (recData)
         {
             case NetworkEventType.DataEvent:
-                //if (System.BitConverter.IsLittleEndian)
-                //    Array.Reverse(recBuffer);
+
+                if (System.BitConverter.IsLittleEndian)
+                    Array.Reverse(recBuffer);
 
                 OtherWins = System.BitConverter.ToInt32(recBuffer, 0);
 
@@ -248,8 +230,9 @@ public class GameManager_Online : GameManager {
         switch (recData)
         {
             case NetworkEventType.DataEvent:
-                //if (System.BitConverter.IsLittleEndian)
-                //    Array.Reverse(recBuffer);
+
+               if (System.BitConverter.IsLittleEndian)
+                   Array.Reverse(recBuffer);
 
                 MyWins = System.BitConverter.ToInt32(recBuffer, 0);
 
@@ -263,19 +246,25 @@ public class GameManager_Online : GameManager {
             GameStats.Instance.SecondWins = OtherWins;
 
 
-        if(!IsGameOverState)
+        if(!IsGameOverState)    // if something goes wrong and we still didn't start GameOver state
             GameOver();
         
     }
 
+    // On oponent disconnected
     public void Disconnect ()
     {
         NetworkTransport.Disconnect(hostId, connectionId, out error);
+        NetworkTransport.RemoveHost(hostId);
         SceneManager.LoadScene(0);
     }
 
+    // We generating grid and, if we server, we sending data about turn and grid
     public override void NewGame()
     {
+        FirstScore = 0;
+        SecondScore = 0;
+
         IsGameOverState = false;
 
         WaitingRespondScreen.SetActive(false);
@@ -293,22 +282,32 @@ public class GameManager_Online : GameManager {
         if (GameStats.Instance.isServer)
         {
             byte[] buffer = { (byte)E_Messages.M_NewGame };
+            if (System.BitConverter.IsLittleEndian)
+                Array.Reverse(buffer);
 
             NetworkTransport.Send(hostId, connectionId, channelId, buffer, sizeof(byte), out error);
 
             buffer = System.BitConverter.GetBytes(GameStats.Instance.BoxesInWidth);
-            
+            if (System.BitConverter.IsLittleEndian)
+                Array.Reverse(buffer);
+
             NetworkTransport.Send(hostId, connectionId, channelId, buffer, sizeof(int), out error);
 
             buffer = System.BitConverter.GetBytes(GameStats.Instance.BoxesInHight);
+            if (System.BitConverter.IsLittleEndian)
+                Array.Reverse(buffer);
 
             NetworkTransport.Send(hostId, connectionId, channelId, buffer, sizeof(int), out error);
 
+            buffer = new byte[1];
             buffer = System.BitConverter.GetBytes(!IsFirstTurn);
+            if (System.BitConverter.IsLittleEndian)
+                Array.Reverse(buffer);
 
             NetworkTransport.Send(hostId, connectionId, channelId, buffer, sizeof(byte) * buffer.Length, out error);
         }
 
+        // refresh grid
         foreach (S_Box b in MyBoxes)
             Destroy(b.gameObject);
         foreach (S_Line l in MyLines)
@@ -316,12 +315,12 @@ public class GameManager_Online : GameManager {
         foreach (S_Dot d in MyDots)
             Destroy(d.gameObject);
 
-
         GridGenerator.GenerateGrid(out MyDots, out MyLines, out MyBoxes, GameStats.Instance.BoxWide, GameStats.Instance.BoxesInWidth, GameStats.Instance.BoxesInHight, MyBox, MyLine, MyDot);
 
         MyHUD.SetActive(true);
     }
 
+    // game over state, showing score and sending data about it
     protected override void GameOver()
     {
         IsGameOverState = true;
@@ -329,7 +328,23 @@ public class GameManager_Online : GameManager {
         IsIReady = false;
         IsOponentReady = false;
 
-        // Game over, start again
+        byte[] buffer = { (byte)E_Messages.M_GameOver };
+        if (System.BitConverter.IsLittleEndian)
+            Array.Reverse(buffer);
+
+        NetworkTransport.Send(hostId, connectionId, channelId, buffer, sizeof(byte), out error);
+
+        buffer = System.BitConverter.GetBytes(GameStats.Instance.FirstWins);
+        if (System.BitConverter.IsLittleEndian)
+            Array.Reverse(buffer);
+
+        NetworkTransport.Send(hostId, connectionId, channelId, buffer, sizeof(int), out error);
+
+        buffer = System.BitConverter.GetBytes(GameStats.Instance.SecondWins);
+        if (System.BitConverter.IsLittleEndian)
+            Array.Reverse(buffer);
+
+        NetworkTransport.Send(hostId, connectionId, channelId, buffer, sizeof(int), out error);
 
         MyHUD.GetComponent<HUD>().UpdateHUD();
         MyHUD.SetActive(false);
@@ -337,6 +352,7 @@ public class GameManager_Online : GameManager {
         GameOverScreen.SetActive(true);
     }
 
+    // Telling what we are ready, and if oponent ready starting game (if client sending to server information what we ready)
     public void SetReady()
     {
         IsIReady = true;
@@ -348,6 +364,8 @@ public class GameManager_Online : GameManager {
             else
             {
                 byte[] buffer = { (byte)E_Messages.M_GameInvite };
+                if (System.BitConverter.IsLittleEndian)
+                    Array.Reverse(buffer);
 
                 NetworkTransport.Send(hostId, connectionId, channelId, buffer, sizeof(byte), out error);
 
@@ -359,6 +377,8 @@ public class GameManager_Online : GameManager {
         else
         {
             byte[] buffer = { (byte)E_Messages.M_GameInvite };
+            if (System.BitConverter.IsLittleEndian)
+                Array.Reverse(buffer);
 
             NetworkTransport.Send(hostId, connectionId, channelId, buffer, sizeof(byte), out error);
 
@@ -369,6 +389,7 @@ public class GameManager_Online : GameManager {
 
     }
 
+    // oponent tell us what he ready
     void GameInvite()
     {
         if (!IsIReady)
@@ -379,14 +400,17 @@ public class GameManager_Online : GameManager {
             else
             {
                 byte[] buffer = { (byte)E_Messages.M_GameInvite };
+                if (System.BitConverter.IsLittleEndian)
+                    Array.Reverse(buffer);
 
-                NetworkTransport.Send(hostId, connectionId, channelId, buffer, sizeof(byte), out error);
+            NetworkTransport.Send(hostId, connectionId, channelId, buffer, sizeof(byte), out error);
             }
     }
 
-
+    // or we making making turn or our oponent (after RecTurn function)
     public override void MakeTurnByLine(int inIndex)
     {
+        // if it's our oponent line must be occupy (if it's we, it will do nothing)
         MyLines[inIndex].HardOccupy();
 
         int BoxCount = MyBoxes.Count;
@@ -409,20 +433,22 @@ public class GameManager_Online : GameManager {
 
         }
 
+        // if it's our turn send turn packet to our oponent
         if (IsFirstTurn)
         {
             byte[] buffer = { (byte)E_Messages.M_Turn };
+            if (System.BitConverter.IsLittleEndian)
+                Array.Reverse(buffer);
 
             NetworkTransport.Send(hostId, connectionId, channelId, buffer, sizeof(byte), out error);
 
             buffer = System.BitConverter.GetBytes(inIndex);
+            if (System.BitConverter.IsLittleEndian)
+                Array.Reverse(buffer);
 
             NetworkTransport.Send(hostId, connectionId, channelId, buffer, sizeof(int), out error);
         }
        
-            
-
-
         if (IsFirstTurn)
             FirstScore += BoxesFound;
         else
@@ -438,7 +464,7 @@ public class GameManager_Online : GameManager {
             return;
         }
 
-
+        // if next turn not our, block input
         IsFirstTurn = CanTurn = !IsFirstTurn;
     }
 

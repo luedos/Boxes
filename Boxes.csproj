@@ -294,7 +294,6 @@
     <Compile Include="Assets\Scripts\HUD\GameOverScreen.cs" />
     <Compile Include="Assets\Scripts\HUD\HUD.cs" />
     <Compile Include="Assets\Scripts\HUD\MainMenuHud.cs" />
-    <Compile Include="Assets\Scripts\HUD\OnlineColorChooser.cs" />
     <Compile Include="Assets\Scripts\S_Box.cs" />
     <Compile Include="Assets\Scripts\S_Dot.cs" />
     <Compile Include="Assets\Scripts\S_Line.cs" />

@@ -17,11 +17,10 @@ public class S_Box : MonoBehaviour {
 
     Color StartColor;
 
-    // Use this for initialization
     void Start () {
         int Y_Index = Index / GameStats.Instance.BoxesInWidth;
 
-
+        // founding indexes of lines around us
         LeftLine = Index + Y_Index;
         RightLine = LeftLine + 1;
         BottomLine = (GameStats.Instance.BoxesInWidth + 1) * GameStats.Instance.BoxesInHight + Index;
@@ -32,18 +31,13 @@ public class S_Box : MonoBehaviour {
         StartColor = GetComponent<SpriteRenderer>().color;
     }
 	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
     private void OnMouseDown()
     {
         if (GameManager.Instance.CanTurn && !GameManager.Instance.OnPause)
             Occupy();
-
     }
 
+    // we can occupy box only if there is only one not occupied line around it
     public bool Occupy()
     {
         int Test = 0;
@@ -101,10 +95,12 @@ public class S_Box : MonoBehaviour {
 
     }
 
+    
     public void Refresh()
     {
         GetComponent<SpriteRenderer>().color = StartColor;
     }
+
     public bool CheckIsFill()
     {
         if (!GameManager.Instance.MyLines[LeftLine].IsOccupied)

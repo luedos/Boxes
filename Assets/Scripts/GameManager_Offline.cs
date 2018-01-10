@@ -5,8 +5,11 @@ using UnityEngine.SceneManagement;
 
 public class GameManager_Offline : GameManager {
 
-	// Use this for initialization
-	void Start () {
+    // calculating width of the box based on biggest number of those boxes, generate grid (boxes/lines/dots), clear general score
+    void Start () {
+
+        GameStats.Instance.FirstWins = 0;
+        GameStats.Instance.SecondWins = 0;
 
         int MainLength = GameStats.Instance.BoxesInWidth > GameStats.Instance.BoxesInHight ? GameStats.Instance.BoxesInWidth : GameStats.Instance.BoxesInHight;
 
@@ -22,11 +25,6 @@ public class GameManager_Offline : GameManager {
 
     }
 	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
     public override void MakeTurnByLine(int inIndex)
     {
         int BoxCount = MyBoxes.Count;
@@ -39,9 +37,11 @@ public class GameManager_Offline : GameManager {
         {
             if (AllBoxesFill)
                 if (!MyBoxes[i].CheckIsFill())
-                    AllBoxesFill = false;
+                    AllBoxesFill = false;               // checking on win game
 
-            if (MyBoxes[i].isHasLine(inIndex))
+
+            // how many boxes filled after filling our line
+            if (MyBoxes[i].isHasLine(inIndex))          
                 if (MyBoxes[i].CheckIsFill())
                 {
                     MyBoxes[i].GetComponent<SpriteRenderer>().color = IsFirstTurn ? GameStats.Instance.FirstColor : GameStats.Instance.SecondColor;
@@ -50,6 +50,7 @@ public class GameManager_Offline : GameManager {
 
         }
 
+
         if (IsFirstTurn)
             FirstScore += BoxesFound;
         else
@@ -57,6 +58,10 @@ public class GameManager_Offline : GameManager {
 
         if (AllBoxesFill)
         {
+            if (FirstScore > SecondScore)
+                GameStats.Instance.FirstWins++;
+            if (SecondScore > FirstScore)
+                GameStats.Instance.SecondWins++;
             GameOver();
             return;
         }
@@ -64,8 +69,12 @@ public class GameManager_Offline : GameManager {
         IsFirstTurn = !IsFirstTurn;
     }
 
+    // refresh all boxes and lines, and local score
     public override void NewGame()
     {
+        FirstScore = 0;
+        SecondScore = 0;
+
         GameOverScreen.SetActive(false);
         MyHUD.SetActive(true);
 
@@ -79,7 +88,6 @@ public class GameManager_Offline : GameManager {
     protected override void GameOver()
     {
         GameOverScreen.SetActive(true);
-
         MyHUD.SetActive(false);
     }
 

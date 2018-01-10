@@ -12,11 +12,7 @@ public class S_Dot : MonoBehaviour {
     void Start () {
         transform.localScale = Vector3.one * GameStats.Instance.BoxWide / 5.12f;
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+
 
     private void OnMouseDown()
     {

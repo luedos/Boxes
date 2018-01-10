@@ -18,6 +18,7 @@ public class MainMenuHud : MonoBehaviour {
         LoadStartMenu();
     }
 
+    // on grid changing
     public void ChooseGrid(int inGrid)
     {
         GameStats.Instance.BoxesInWidth = inGrid + 2;
@@ -31,6 +32,7 @@ public class MainMenuHud : MonoBehaviour {
 
     public void StartOffline()
     {
+        // do not start if colors did not choosed
         if (GameStats.Instance.FirstColor != Color.clear && GameStats.Instance.SecondColor != Color.clear)
             SceneManager.LoadScene(1);
     }
@@ -48,18 +50,18 @@ public class MainMenuHud : MonoBehaviour {
 
     public void StartClient()
     {
+        // do not start if colors did not choosed or ip and port sets up incorrectly
         if (GameStats.Instance.FirstColor != Color.clear && GameStats.Instance.SecondColor != Color.clear)
             if (GameStats.Instance.IP != "" && GameStats.Instance.PORT > 999 && GameStats.Instance.PORT < 10000)
             {
             GameStats.Instance.isServer = false;
             SceneManager.LoadScene(2);
-            }
-        
-        
+            }        
     }
 
     public void StartServer()
     {
+        // do not start if colors did not choosed or port sets up incorrectly
         if (GameStats.Instance.FirstColor != Color.clear && GameStats.Instance.SecondColor != Color.clear)
             if (GameStats.Instance.PORT > 999 && GameStats.Instance.PORT < 10000)
             {
@@ -69,6 +71,7 @@ public class MainMenuHud : MonoBehaviour {
             }
     }
 
+    // sets colors, ip, port clear when we returning back on main menu
     public void LoadStartMenu()
     {
         GameStats.Instance.FirstColor = Color.clear;

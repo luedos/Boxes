@@ -21,6 +21,7 @@ public class S_Line : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        // finding dots aroud us depending on vertical or horizontal line we are
 		if(IsVertical)
         {
             LeftBottomDot = Index;
@@ -40,17 +41,13 @@ public class S_Line : MonoBehaviour {
 
         transform.localScale = Vector3.one * GameStats.Instance.BoxWide / 5.12f;
     }
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+
 
     public void OnMouseDown()
     {
         if(GameManager.Instance.CanTurn && !GameManager.Instance.OnPause)
-        if(Occupy())
-        GameManager.Instance.MakeTurnByLine(Index);
+            if(Occupy())        // if we are not allready occupied
+                GameManager.Instance.MakeTurnByLine(Index);
     }
 
     
@@ -67,9 +64,9 @@ public class S_Line : MonoBehaviour {
         return false;
     }
 
+    // change occupy state whether or not we are already occupied
     public bool HardOccupy(bool inOccupy = true)
     {
-
         if (inOccupy != IsOccupied)
         {
             GetComponent<SpriteRenderer>().color = inOccupy ? Color.cyan : StartColor;

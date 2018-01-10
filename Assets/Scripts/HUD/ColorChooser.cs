@@ -13,6 +13,7 @@ public class ColorChooser : MonoBehaviour {
         MyColor = GetComponent<Image>().color;
     }
 
+    // if we choosed, dechoose every other color on our player and set us as color on GameStates
     public void OnColorChoosed()
     {
         if(MyColor != (isFirst ? GameStats.Instance.SecondColor : GameStats.Instance.FirstColor))
@@ -30,9 +31,6 @@ public class ColorChooser : MonoBehaviour {
             foreach (ColorChooser cc in MyChoosers)
             {
                 if (cc.isFirst == isFirst && cc != this)
-                    //if (cc.ColorIndex == ColorIndex)
-                    //    cc.HardChoose();
-                    //else
                     cc.DeChooseColor();
 
             }
